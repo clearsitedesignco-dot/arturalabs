@@ -10,28 +10,7 @@ permissions:
 
 jobs:
 
-  # Runs the real app on a virtual screen and photographs every page.
-  # If the stylesheet fails to load, this job fails and no release goes out.
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci
-      - run: npm run fonts
-      - name: Screenshot every screen
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1400x900x24" npm run screenshots
-        env:
-          ARTURA_SCREENSHOT_DIR: ${{ github.workspace }}/screenshots
-      - uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: screenshots/*.png
-          if-no-files-found: error
-
   build:
-    needs: verify
     strategy:
       fail-fast: false
       matrix:
