@@ -1,0 +1,71 @@
+{
+  "name": "arturalabs",
+  "productName": "ArturaLabs",
+  "version": "0.1.0",
+  "description": "Local-first client acquisition workspace",
+  "main": "src/main/main.js",
+  "author": {
+    "name": "ArturaLabs"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "fonts": "node scripts/fetch-fonts.js",
+    "screenshots": "ARTURA_SCREENSHOT=1 electron .",
+    "dist": "npm run fonts && electron-builder",
+    "dist:win": "npm run fonts && electron-builder --win",
+    "dist:mac": "npm run fonts && electron-builder --mac",
+    "dist:linux": "npm run fonts && electron-builder --linux"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "@electron/rebuild": "^3.7.0"
+  },
+  "build": {
+    "appId": "co.artura.labs",
+    "productName": "ArturaLabs",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "ArturaLabs"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.business",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    }
+  }
+}

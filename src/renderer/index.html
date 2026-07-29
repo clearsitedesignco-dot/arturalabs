@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none';
+               script-src 'self';
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+               font-src 'self' https://fonts.gstatic.com;
+               img-src 'self' data:;
+               connect-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ArturaLabs</title>
+<!-- Local copies first. scripts/fetch-fonts.js vendors these so the app looks
+     right offline; the CDN line below is only a fallback if that has not run. -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mark" viewBox="0 0 120 100">
+    <path d="M38 4 L74 96 L56 96 L38 48 L20 96 L2 96 Z"/>
+    <path d="M52 96 L96 2 L118 2 L118 30 L104 20 L72 96 Z"/>
+    <path d="M100 96 L100 46 L118 38 L118 96 Z"/>
+  </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24">
+    <path d="M2 21 L7 8 L12 21 L9.5 21 L7 14.5 L4.5 21 Z"/><path d="M11 21 L17 3 L22 21 L19.2 21 L17 12 L13.8 21 Z"/>
+  </symbol>
+  <symbol id="i-scraper" viewBox="0 0 24 24">
+    <path d="M2 3 L22 3 L14.5 12 L14.5 20 L9.5 22.5 L9.5 12 Z M6.2 5.5 L11 11 L13 11 L17.8 5.5 Z"/>
+  </symbol>
+  <symbol id="i-enrich" viewBox="0 0 24 24">
+    <path d="M2 5 L22 5 L22 20 L2 20 Z M4.8 7.4 L12 13.6 L19.2 7.4 Z M4 9.6 L4 17.6 L8.6 13.4 Z M20 9.6 L20 17.6 L15.4 13.4 Z M4.8 17.6 L10.2 14.8 L12 16.3 L13.8 14.8 L19.2 17.6 Z"/>
+  </symbol>
+  <symbol id="i-outreach" viewBox="0 0 24 24">
+    <path d="M22 2 L14 22 L11 14 L3 11 Z M8.4 11.6 L12.6 13.2 L14.2 17.4 L18 6.4 Z"/><path d="M2 20 L7 15 L8.6 16.6 L3.6 21.6 Z"/>
+  </symbol>
+  <symbol id="i-calls" viewBox="0 0 24 24">
+    <path d="M2 4 L8 12 L2 20 L2 15.4 L4.6 12 L2 8.6 Z"/><path d="M9 4 L15 12 L9 20 L9 15.4 L11.6 12 L9 8.6 Z"/><path d="M17.5 3 L22 3 L22 21 L17.5 21 Z"/>
+  </symbol>
+  <symbol id="i-meet" viewBox="0 0 24 24">
+    <path d="M2 5 L22 5 L22 21.5 L2 21.5 Z M4.4 9.6 L4.4 19.1 L19.6 19.1 L19.6 9.6 Z"/>
+    <path d="M5.5 2 L8 2 L8 6.6 L5.5 6.6 Z M16 2 L18.5 2 L18.5 6.6 L16 6.6 Z"/>
+    <path d="M9.6 11.6 L15.4 14.4 L9.6 17.2 Z"/>
+  </symbol>
+  <symbol id="i-scanner" viewBox="0 0 24 24">
+    <path d="M12 2 L21 5.5 L21 12 L12 22 L3 12 L3 5.5 Z M12 4.9 L5.6 7.4 L5.6 11.1 L12 18.2 L18.4 11.1 L18.4 7.4 Z"/><path d="M12 8 L15.4 11.6 L12 15.2 L8.6 11.6 Z"/>
+  </symbol>
+  <symbol id="i-launch" viewBox="0 0 24 24">
+    <path d="M2 21 L2 16 L7 16 L7 11 L12 11 L12 6 L17 6 L17 21 Z"/><path d="M19 2 L23 9 L15 9 Z"/>
+  </symbol>
+  <symbol id="i-prompts" viewBox="0 0 24 24">
+    <path d="M3 3 L9 3 L9 21 L3 21 Z"/><path d="M10.5 3 L15 3 L15 21 L10.5 21 Z"/><path d="M16.6 4.4 L21.4 5.8 L17 21.6 L12.2 20.2 Z"/>
+  </symbol>
+  <symbol id="i-closed" viewBox="0 0 24 24">
+    <path d="M2 21 L2 16.6 L7.6 16.6 L7.6 11.4 L13.2 11.4 L13.2 6.2 L18.8 6.2 L18.8 21 Z"/><path d="M14.4 2 L22 2 L22 9.6 L19.2 6.8 L15.6 10.4 L13.6 8.4 L17.2 4.8 Z"/>
+  </symbol>
+  <symbol id="i-keys" viewBox="0 0 24 24">
+    <path d="M9 4 L15 10 L9 16 L3 10 Z M9 7.4 L6.4 10 L9 12.6 L11.6 10 Z"/><path d="M14 8.6 L22 8.6 L22 11.4 L20 11.4 L20 14.6 L17.6 14.6 L17.6 11.4 L14 11.4 Z"/>
+  </symbol>
+  <symbol id="i-about" viewBox="0 0 24 24">
+    <path d="M12 2 L22 12 L12 22 L2 12 Z M12 5.7 L5.7 12 L12 18.3 L18.3 12 Z"/><path d="M11 10.2 L13 10.2 L13 15.4 L11 15.4 Z M11 7.4 L13 7.4 L13 9.1 L11 9.1 Z"/>
+  </symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24">
+    <path d="M12 2 L21 5.5 L21 12 L12 22 L3 12 L3 5.5 Z M12 4.9 L5.6 7.4 L5.6 11.1 L12 18.2 L18.4 11.1 L18.4 7.4 Z"/>
+  </symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24">
+    <path d="M12 2 L23 21 L1 21 Z M12 7.5 L5.8 18.4 L18.2 18.4 Z"/><path d="M11 10 L13 10 L13 14.6 L11 14.6 Z M11 15.8 L13 15.8 L13 17.4 L11 17.4 Z"/>
+  </symbol>
+</svg>
+
+<!-- SIDEBAR -->
+<aside class="rail">
+  <div class="brand">
+    <svg class="lg" viewBox="0 0 120 100"><use href="#i-mark"/></svg>
+    <div class="wm">Artura<span>Labs</span></div>
+  </div>
+  <nav class="nav">
+    <button class="item on" data-go="home" data-icon="i-home">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg></span> Home
+    </button>
+    <div class="grp">Pipeline</div>
+    <button class="item" data-go="scraper" data-icon="i-scraper" data-name="Lead Scraper">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-scraper"/></svg></span> Lead Scraper <span class="tag">01</span>
+    </button>
+    <button class="item" data-go="outreach" data-icon="i-outreach" data-name="Outreach">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-outreach"/></svg></span> Outreach <span class="tag">02</span>
+    </button>
+    <button class="item" data-go="organizer" data-icon="i-calls" data-name="Call Organizer">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-calls"/></svg></span> Call Organizer <span class="tag">03</span>
+    </button>
+    <button class="item" data-go="meetings" data-icon="i-meet" data-name="Meetings">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-meet"/></svg></span> Meetings <span class="tag">04</span>
+    </button>
+    <div class="grp">Toolkit</div>
+    <button class="item" data-go="sitecheck" data-icon="i-scanner" data-name="Site Check">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-scanner"/></svg></span> Site Check
+    </button>
+    <button class="item" data-go="projects" data-icon="i-launch" data-name="Projects">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-launch"/></svg></span> Projects
+    </button>
+    <button class="item" data-go="prompts" data-icon="i-prompts" data-name="Prompt Library">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-prompts"/></svg></span> Prompt Library
+    </button>
+  </nav>
+  <div class="rail-foot">
+    <button class="item" data-go="profile" data-icon="i-about">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-about"/></svg></span> Your Details
+      <span class="pip off" style="margin-left:auto" id="profpip"></span>
+    </button>
+    <button class="item" data-go="keys" data-icon="i-keys">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-keys"/></svg></span> API Keys
+      <span class="pip off" style="margin-left:auto" id="railpip"></span>
+    </button>
+    <button class="item" data-go="about" data-icon="i-about">
+      <span class="ico"><svg viewBox="0 0 24 24"><use href="#i-about"/></svg></span> About
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="head">
+    <span class="hico"><svg viewBox="0 0 24 24" id="headicon"><use href="#i-home"/></svg></span>
+    <div><h1 id="vt">Home</h1><div class="sub" id="vs">No leads yet</div></div>
+    <div class="right">
+      <span class="meter" id="meter" hidden><b id="meterN">100</b> searches left this cycle</span>
+      <span class="status"><span class="pip off" id="headpip"></span><span id="heads">Setup incomplete</span></span>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section class="view" id="v-home">
+    <p class="lede">Your leads, notes, and API keys are stored on this computer and never sent to ArturaLabs. The only thing shared is your closed-deal total, which powers the member counter below — and you can switch that off.</p>
+    <div class="pipewrap"><div class="flowline"><i></i><i></i><i></i></div>
+    <div class="pipe rise">
+      <div class="stage"><span class="si"><svg viewBox="0 0 24 24"><use href="#i-scraper"/></svg></span><div class="t">Scraped</div><div class="v" id="c-scraped">0</div><div class="u">leads</div></div>
+      <div class="stage"><span class="si"><svg viewBox="0 0 24 24"><use href="#i-enrich"/></svg></span><div class="t">Enriched</div><div class="v" id="c-enriched">0</div><div class="u">with contact</div></div>
+      <div class="stage"><span class="si"><svg viewBox="0 0 24 24"><use href="#i-outreach"/></svg></span><div class="t">Contacted</div><div class="v" id="c-contacted">0</div><div class="u">sent</div></div>
+      <div class="stage"><span class="si"><svg viewBox="0 0 24 24"><use href="#i-calls"/></svg></span><div class="t">Booked</div><div class="v" id="c-booked">0</div><div class="u">calls</div></div>
+    </div></div>
+    <div class="won">
+      <span class="wi"><svg viewBox="0 0 24 24"><use href="#i-closed"/></svg></span>
+      <div>
+        <div class="wt"><span class="livedot"></span> Closed by ArturaLabs members</div>
+        <div class="wv">$11,000</div>
+      </div>
+      <div class="wb"><b>$11,000</b> carried in<br><b>$0</b> logged in the Call Organizer<br>1 member reporting</div>
+    </div>
+    <p class="caption">Counts deals members marked won in the Call Organizer, plus revenue carried in from before they joined. Individual results vary and most members earn nothing. Sharing your number is optional and can be switched off in Settings.</p>
+
+    <div class="h-sec">Activity</div>
+    <div class="actwrap" id="actFeed"></div>
+
+    <div class="h-sec">Start here</div>
+    <div class="rows rise">
+      <div class="row"><span class="rn">01</span>
+        <div><div class="rt">Add your SerpApi key</div><div class="rd">Free to start, and no credit card needed.</div></div>
+        <div class="rr"><span class="pip off" id="homepip"></span><button class="btn pri" data-go="keys" data-icon="i-keys">Add key</button></div></div>
+      <div class="row"><span class="rn">02</span>
+        <div><div class="rt">Run your first search</div><div class="rd">Pick a business type and a zip code to pull your first leads.</div></div>
+        <div class="rr"><button class="btn" data-go="scraper" data-icon="i-scraper" data-name="Lead Scraper">Open scraper</button></div></div>
+      <div class="row"><span class="rn">03</span>
+        <div><div class="rt">Make your first calls</div><div class="rd">Work the queue and log what happened.</div></div>
+        <div class="rr"><span class="status" style="color:var(--ink-3)">Locked</span></div></div>
+    </div>
+  </section>
+
+  <!-- ================= LEAD SCRAPER ================= -->
+  <section class="view" id="v-scraper" hidden>
+
+    <!-- locked state -->
+    <div id="sc-locked" hidden>
+      <div class="empty">
+        <span class="bigico"><svg viewBox="0 0 24 24"><use href="#i-scraper"/></svg></span>
+        <h3>Add your SerpApi key to start searching</h3>
+        <p>The Lead Scraper needs a key to pull businesses. SerpApi is free to start and doesn't ask for a credit card.</p>
+        <div style="margin-top:20px"><button class="btn pri lg" data-go="keys" data-icon="i-keys">Go to API Keys</button></div>
+      </div>
+    </div>
+
+    <!-- form -->
+    <div id="sc-main" hidden>
+      <div class="alert" style="margin:0 0 20px">
+        <span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>
+        <div style="flex:1"><h4>Sample data — these businesses are not real</h4>
+        <p>This build runs on the mock provider so the tool can be tested without spending searches. Names and addresses are invented, phone numbers use the reserved 555 range so nobody can be called by accident, and websites end in <b>.example</b>, a domain that can never resolve. Real listings appear once the SerpApi provider is connected.</p></div>
+      </div>
+      <div class="card">
+        <div class="fgrid">
+          <div class="fld">
+            <label class="lb" for="btype">Business type</label>
+            <select id="btype">
+              <option value="">Choose a business type…</option>
+              <option>Roofing</option><option>HVAC</option><option>Plumbing</option>
+              <option>Landscaping</option><option>Dental</option><option>Auto Repair</option>
+              <option>Salon</option><option>Gym</option><option>Restaurant</option><option>Real Estate</option>
+              <option value="__other">Other…</option>
+            </select>
+            <input class="txt" id="btypeOther" placeholder="Type a business type" style="margin-top:9px" hidden>
+            <div class="errmsg" id="e-btype">Choose a business type before searching.</div>
+          </div>
+          <div class="fld">
+            <label class="lb" for="zip">Zip code</label>
+            <input class="txt mono" id="zip" inputmode="numeric" maxlength="5" placeholder="64108">
+            <div class="errmsg" id="e-zip">Enter a 5-digit zip code.</div>
+          </div>
+        </div>
+
+        <div class="fieldsets">
+          <div class="fs">
+            <div class="fsh">From the search API</div>
+            <div class="fsd">Returned instantly</div>
+            <label class="cb locked"><input type="checkbox" checked disabled> Business name</label>
+            <label class="cb"><input type="checkbox" class="f" data-f="address" checked> Address</label>
+            <label class="cb"><input type="checkbox" class="f" data-f="city" checked> City</label>
+            <label class="cb"><input type="checkbox" class="f" data-f="phone" checked> Phone number</label>
+            <label class="cb"><input type="checkbox" class="f" data-f="website" checked> Website</label>
+            <label class="cb"><input type="checkbox" class="f" data-f="rating"> Rating and review count</label>
+          </div>
+          <div class="fs">
+            <div class="fsh">Requires enrichment</div>
+            <div class="fsd">A second, slower step</div>
+            <label class="cb"><input type="checkbox" class="f e" data-f="email"> Email address</label>
+            <label class="cb"><input type="checkbox" class="f e" data-f="contact"> Contact name</label>
+            <div class="fsnote">Search APIs don't publish these. Checking them flags the lead for the Enrichment tool, which visits each website to find published contact details. Run it after this search finishes.</div>
+          </div>
+
+          <div class="fs">
+            <div class="fsh">Website status</div>
+            <div class="fsd">Who you want to sell to</div>
+            <label class="cb"><input type="checkbox" class="w" data-w="none" checked> No website at all</label>
+            <label class="cb"><input type="checkbox" class="w" data-w="dead" checked> Website doesn't load</label>
+            <label class="cb"><input type="checkbox" class="w" data-w="weak" checked> Weak website</label>
+            <label class="cb"><input type="checkbox" class="w" data-w="solid" checked> Solid website</label>
+            <div class="fsnote" id="wnote">Businesses with no website come straight from the search results. The other three mean opening each site to see whether it loads and how it's built — about a second per lead, and it uses no searches.</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn pri lg" id="goSearch">Search</button>
+          <span class="meter" id="costnote">Uses up to 3 of your searches</span>
+        </div>
+      </div>
+
+      <div id="sc-out"></div>
+
+      <div class="devbar">
+        <span class="dl">Test harness</span>
+        <select id="devErr">
+          <option value="ok">Normal search</option>
+          <option value="zero">Zero results</option>
+          <option value="key">Invalid API key</option>
+          <option value="quota">Monthly allowance exhausted</option>
+          <option value="hourly">Hourly cap hit</option>
+          <option value="network">Network failure</option>
+        </select>
+        <button class="btn" id="devReset">Clear all leads</button>
+        <span class="dn">Mock provider — no real API calls, nothing is billed</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CALL ORGANIZER ================= -->
+  <section class="view" id="v-organizer" hidden>
+    <div id="org-empty" hidden>
+      <div class="empty">
+        <span class="bigico"><svg viewBox="0 0 24 24"><use href="#i-calls"/></svg></span>
+        <h3>Nothing in the queue yet</h3>
+        <p>Run a search in the Lead Scraper, tick the businesses worth calling, and send them here. The queue puts one in front of you at a time so you're not picking who to ring next.</p>
+        <div style="margin-top:20px"><button class="btn pri lg" data-go="scraper" data-icon="i-scraper" data-name="Lead Scraper">Open Lead Scraper</button></div>
+      </div>
+    </div>
+
+    <div id="org-main" hidden>
+      <div class="statbar rise" id="statbar"></div>
+      <div class="tabs">
+        <button class="tab on" data-tab="queue">Queue</button>
+        <button class="tab" data-tab="list">All leads</button>
+      </div>
+      <div id="org-queue"></div>
+      <div id="org-list" hidden></div>
+    </div>
+  </section>
+
+  <!-- ================= PROJECTS ================= -->
+  <section class="view" id="v-projects" hidden>
+    <div id="pj-list"></div>
+    <div id="pj-detail" hidden></div>
+  </section>
+
+  <!-- ================= PROMPT LIBRARY ================= -->
+  <section class="view" id="v-prompts" hidden>
+    <p class="lede">Every effect below is running live — that is the actual animation, not a screenshot. Find one you like, copy the prompt, paste it into Claude. The prompts are written to produce the real thing with GSAP rather than a rough approximation.</p>
+    <div class="gsapnote">
+      <div class="gh">A note on GSAP before you start</div>
+      <p>GSAP is the animation library behind most of the sites that make people say "how did they do that." Since April 2025 it is completely free, including every plugin that used to cost money, and the licence covers paid client work. Load it from a CDN in two lines and you are done.</p>
+      <pre class="snip">&lt;script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"&gt;&lt;/script&gt;</pre>
+      <p class="tiny" style="margin-top:10px">The previews here are built in plain CSS so they always run, even offline. The prompts ask for GSAP, which is smoother and far easier to sequence once you have more than one thing moving.</p>
+    </div>
+    <div class="chips" id="pcats" style="margin-top:26px"></div>
+    <div class="pgridw rise" id="plist"></div>
+  </section>
+
+  <!-- ================= YOUR DETAILS ================= -->
+  <section class="view" id="v-profile" hidden>
+    <p class="lede">Fill this in once. Every email you send merges these details with what the app found about each business, so the message reads like you wrote it rather than a template.</p>
+    <div class="pgrid pf" id="profForm"></div>
+    <div style="margin-top:20px;display:flex;gap:12px;align-items:center;max-width:760px">
+      <button class="btn pri lg" id="saveProf">Save details</button>
+      <span class="meter" id="profNote"></span>
+    </div>
+  </section>
+
+  <!-- ================= OUTREACH ================= -->
+  <section class="view" id="v-outreach" hidden>
+    <div id="out-noprof" hidden>
+      <div class="empty">
+        <span class="bigico"><svg viewBox="0 0 24 24"><use href="#i-outreach"/></svg></span>
+        <h3>Tell the app who you are first</h3>
+        <p>Emails need your name, your business, and roughly what you charge — otherwise every message reads like a form letter. It takes two minutes and you only do it once.</p>
+        <div style="margin-top:20px"><button class="btn pri lg" data-go="profile" data-icon="i-about">Fill in your details</button></div>
+      </div>
+    </div>
+    <div id="out-noleads" hidden>
+      <div class="empty">
+        <span class="bigico"><svg viewBox="0 0 24 24"><use href="#i-outreach"/></svg></span>
+        <h3>No leads to write to yet</h3>
+        <p>Run a search in the Lead Scraper first. Outreach then finds their email addresses, checks how their sites are built, and writes each message from what it finds.</p>
+        <div style="margin-top:20px"><button class="btn pri lg" data-go="scraper" data-icon="i-scraper" data-name="Lead Scraper">Open Lead Scraper</button></div>
+      </div>
+    </div>
+    <div id="out-main" hidden>
+      <div class="steps rise" id="outSteps"></div>
+      <div id="outStage"></div>
+    </div>
+  </section>
+
+  <!-- ================= SITE CHECK ================= -->
+  <section class="view" id="v-sitecheck" hidden>
+    <div class="alert" style="margin:0 0 22px">
+      <span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>
+      <div style="flex:1"><h4>Sample sites only in this build</h4>
+      <p>Browsers won't let a web page read another website's code, so nothing here can analyse a real address. Rather than invent findings that might be wrong, this build ships four authored sample sites. Every word of the reports is real and transfers straight across — only the fetching waits for the desktop app.</p></div>
+    </div>
+    <p class="lede">Pick a sample site to see what the report gives you. Each problem comes one at a time, with the code, what it means, and the exact words to use on the call.</p>
+    <div class="samples" id="sc-picker"></div>
+    <div class="urlbar" style="margin-top:22px">
+      <input id="siteUrl" placeholder="Try a real address (desktop app only)" spellcheck="false">
+      <button class="btn" id="runCheck">Check it</button>
+    </div>
+    <div id="sc-report" style="margin-top:30px"></div>
+  </section>
+
+  <!-- ================= MEETINGS ================= -->
+  <section class="view" id="v-meetings" hidden>
+    <div id="mt-empty" hidden>
+      <div class="empty">
+        <span class="bigico"><svg viewBox="0 0 24 24"><use href="#i-meet"/></svg></span>
+        <h3>No meetings booked yet</h3>
+        <p>When you mark a call as <b>Meeting booked</b> in the Call Organizer, it lands here with a prep sheet, a confirmation message, and somewhere to record how it went.</p>
+        <div style="margin-top:20px"><button class="btn pri lg" data-go="organizer" data-icon="i-calls" data-name="Call Organizer">Open Call Organizer</button></div>
+      </div>
+    </div>
+    <div id="mt-main" hidden>
+      <div class="funnel rise" id="mt-funnel"></div>
+      <div id="mt-list"></div>
+    </div>
+  </section>
+
+  <!-- GENERIC TOOL SLOT -->
+  <section class="view" id="v-tool" hidden>
+    <div class="empty">
+      <span class="bigico"><svg viewBox="0 0 24 24" id="emptyicon"><use href="#i-enrich"/></svg></span>
+      <h3 id="et">Contact Enrichment</h3>
+      <p id="ed"></p>
+      <div class="code">
+        <div class="ch">tools/registry.js</div>
+        <pre>{
+  <span class="k">id</span>:    <span class="k">'contact-enrichment'</span>,
+  <span class="k">name</span>:  <span class="k">'Contact Enrichment'</span>,
+  <span class="k">group</span>: <span class="k">'pipeline'</span>,
+  <span class="k">icon</span>:  <span class="k">'i-enrich'</span>,
+  <span class="k">keys</span>:  [],
+  <span class="k">view</span>:  <span class="c">null</span>              <span class="c">// ← the only line that changes</span>
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY VAULT -->
+  <section class="view" id="v-keys" hidden>
+    <p class="lede">Keys are stored in your computer's keychain and never leave this machine. Paste one and it's checked right away, so you find out here rather than three screens later.</p>
+    <div class="krow">
+      <div class="ktop">
+        <div>
+          <div class="ktitle">SerpApi <span class="req">Required</span></div>
+          <div class="kdesc">Powers the Lead Scraper. Free to start with no credit card. Check the current free allowance on serpapi.com/pricing.</div>
+        </div>
+        <div class="kr"><span class="status"><span class="pip off" id="p1"></span><span id="s1">Not added</span></span></div>
+      </div>
+      <div class="kfield">
+        <input id="k1" type="text" placeholder="Paste your key here" autocomplete="off" spellcheck="false">
+        <button class="btn pri" id="b1">Check key</button>
+      </div>
+      <div class="kmsg" id="m1"><span>Don't have one yet? <span class="lnk">Open the SerpApi signup page</span> — it takes about two minutes.</span></div>
+    </div>
+    <div class="krow">
+      <div class="ktop">
+        <div>
+          <div class="ktitle">Anthropic <span class="req">Optional</span></div>
+          <div class="kdesc">Writes first-draft outreach in the Outreach Generator. Skip it and you can still write your templates by hand.</div>
+        </div>
+        <div class="kr"><span class="status"><span class="pip off"></span><span>Not added</span></span></div>
+      </div>
+      <div class="kfield">
+        <input type="text" placeholder="Paste your key here" autocomplete="off" spellcheck="false">
+        <button class="btn">Check key</button>
+      </div>
+    </div>
+    <div class="note">
+      <span class="ni"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></span>
+      <span>ArturaLabs has no server storing your keys and never sees your usage. SerpApi bills you directly on your own account, and you can revoke a key at any time from their dashboard. Your leads and keys are never shared — only your closed-deal total, if you leave that switched on.</span>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="view" id="v-about" hidden>
+    <div class="empty">
+      <span class="bigico" style="opacity:1;width:58px;height:58px"><svg viewBox="0 0 120 100" style="width:58px;height:58px"><use href="#i-mark"/></svg></span>
+      <h3 style="font-size:24px">ArturaLabs</h3>
+      <p style="font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;margin-top:4px">Version 0.2.0 — Shell + Lead Scraper</p>
+      <p style="margin-top:18px">A local-first workspace for finding clients and closing them. All of your data stays on this computer.</p>
+    </div>
+  </section>
+</main>
+
+<!-- ================= FIRST RUN ================= -->
+<div id="onb" hidden>
+  <div class="onb-card">
+    <div class="onb-side">
+      <svg class="onb-mark" viewBox="0 0 120 100"><use href="#i-mark"/></svg>
+      <div class="onb-wm">Artura<span>Labs</span></div>
+      <div class="onb-steps">
+        <div class="os" data-s="1"><i>1</i> Welcome</div>
+        <div class="os" data-s="2"><i>2</i> Your search key</div>
+        <div class="os" data-s="3"><i>3</i> Your details</div>
+      </div>
+      <div class="onb-foot">Everything stays on this computer.</div>
+    </div>
+    <div class="onb-main">
+
+      <div class="onb-p" data-p="1">
+        <h2>Let's get you set up</h2>
+        <p class="onb-lede">This takes about five minutes, and you only do it once. Two things: a free key so the app can find businesses, and a few details about you so it can write emails that sound like you.</p>
+        <div class="onb-list">
+          <div><b>Nothing you do here leaves this computer.</b> Your leads, your notes and your key are stored on this machine. There is no ArturaLabs server holding them.</div>
+          <div><b>You will not be charged by us for searches.</b> You use your own free account, and you can see exactly how many searches you have left inside the app.</div>
+          <div><b>You can change any of this later</b> from Your Details and API Keys in the sidebar.</div>
+        </div>
+        <div class="onb-acts"><button class="btn pri lg" data-go-step="2">Get started</button></div>
+      </div>
+
+      <div class="onb-p" data-p="2" hidden>
+        <h2>Get your free search key</h2>
+        <p class="onb-lede">This is what lets the app pull local businesses. It is free to start and does not ask for a card.</p>
+        <ol class="onb-ol">
+          <li>Click the button below. SerpApi opens in your browser.</li>
+          <li>Sign up with an email address. No card needed.</li>
+          <li>On your dashboard, find <b>Your Private API Key</b> and copy the whole thing.</li>
+          <li>Come back here and paste it in.</li>
+        </ol>
+        <div class="onb-acts" style="margin-bottom:18px">
+          <button class="btn" id="onbOpenSerp">Open the signup page</button>
+        </div>
+        <div class="kfield">
+          <input id="onbKey" placeholder="Paste your key here" autocomplete="off" spellcheck="false">
+          <button class="btn pri" id="onbCheck">Check it</button>
+        </div>
+        <div class="onb-msg" id="onbKeyMsg"></div>
+        <div class="onb-acts" style="margin-top:22px">
+          <button class="btn" data-go-step="1">← Back</button>
+          <button class="btn pri" id="onbNext2" disabled>Continue</button>
+          <button class="btn ghost" data-go-step="3">Skip for now</button>
+        </div>
+      </div>
+
+      <div class="onb-p" data-p="3" hidden>
+        <h2>Tell the app who you are</h2>
+        <p class="onb-lede">Every email the app writes merges these with what it found about each business. Without them, every message reads like a form letter.</p>
+        <div class="pgrid pf" id="onbProf"></div>
+        <div class="onb-acts" style="margin-top:22px">
+          <button class="btn" data-go-step="2">← Back</button>
+          <button class="btn pri lg" id="onbDone">Finish setup</button>
+        </div>
+        <div class="onb-msg" id="onbProfMsg"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
