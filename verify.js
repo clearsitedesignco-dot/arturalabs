@@ -16,7 +16,7 @@ const MANIFEST = {
   "assets/icon.png": "72a6b5f07d4bbcc474f6dbb216973479e377efbf770b4a501fd2fa1e08fb98e5",
   "assets/mark-white.svg": "a20a6af9f7ea2c918157240d7a8f49b8d58a6263e879ab203758f5193179486c",
   "assets/mark.svg": "0e210c40bb74f79b257631449ee135bfd8f3f36d301057a23dd934906db85446",
-  "package.json": "9aff48158bfcc62ea2eb9ec4d1d2e678c4c0a72d0d9222e4f7266ff896181fd2",
+  "package.json": "a47853b24c1a7dcd4db9683ae690f542efc01ee6cecfd8e521e939d6688ec8f9",
   "scripts/fetch-fonts.js": "5e07778db9633ea00444cca6cb836ad153ad22868a5479b6d20c879b2e181537",
   "scripts/make-icons.js": "96a278e85fb8679e0d084689ba7e0ed2e67cd5ee8fb79d1304a74e442b230d1d",
   "src/main/enrich.js": "2e4e9a60f51147158a371dd18a001467a15713bef8a7c6fe7318962470bce92e",
@@ -28,7 +28,7 @@ const MANIFEST = {
   "src/main/providers/serpapi.js": "aaeeb50777fce77bfbd3f4cf3be0ca7f8c5dc3dbac22bcebd4b0c416cd984fbc",
   "src/main/sitecheck.js": "f5d0dcc20f03e241c8c15b58a028cc360cc9681883c0b5353f1490bafb6cd153",
   "src/main/store.js": "c6e7d60bd2aae5804d6aec7cdda3ba32690b017223f37e789c311cb40698fae1",
-  "src/renderer/app.js": "3c0e62fecf4b4fc59137687a735d26ce0ad2aa56a9d3ed864d094b85c89562e7",
+  "src/renderer/app.js": "bfca7be0e7d9d13ddf9354d47922154023946a0bb27829f1a9768ad33ddb1fa6",
   "src/renderer/fonts/archivo-500.woff2": "37104fa5c30e92a0dabb944452f63089007b44db26fdff6a255ca49b09c4e14e",
   "src/renderer/fonts/archivo-600.woff2": "37104fa5c30e92a0dabb944452f63089007b44db26fdff6a255ca49b09c4e14e",
   "src/renderer/fonts/archivo-700.woff2": "37104fa5c30e92a0dabb944452f63089007b44db26fdff6a255ca49b09c4e14e",
@@ -38,7 +38,7 @@ const MANIFEST = {
   "src/renderer/fonts/inter-400.woff2": "009049fc92898a74f4d613ab5311d4819e0929af9ca24307ab1dda081016f6ab",
   "src/renderer/fonts/inter-500.woff2": "009049fc92898a74f4d613ab5311d4819e0929af9ca24307ab1dda081016f6ab",
   "src/renderer/fonts/inter-600.woff2": "009049fc92898a74f4d613ab5311d4819e0929af9ca24307ab1dda081016f6ab",
-  "src/renderer/index.html": "b52b00fab9d2cba455e30e95523384e3658621ad8cfdcc471351219fd893f78b",
+  "src/renderer/index.html": "f2e8f0fdbdc204106a8174633ff0b84ec3cde752a47bd55902099728d06db084",
   "src/renderer/styles.css": "ed4a258789c205f710d9d20a6d7cdd0cfd6da029dc3bafa65addf481f8ce78b9"
 };
 const strip = buf => { const o = Buffer.alloc(buf.length); let j = 0;

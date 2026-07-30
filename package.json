@@ -1,7 +1,7 @@
 {
   "name": "arturalabs",
   "productName": "ArturaLabs",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Local-first client acquisition workspace",
   "main": "src/main/main.js",
   "author": {

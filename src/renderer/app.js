@@ -410,6 +410,34 @@ function confirmMessage(L){
     +`Here's the link: ${L.meet_link||'[paste your Google Meet link]'}`;
 }
 
+/* Electron does not implement window.prompt(), so this small modal replaces it.
+   Resolves with the entered string, or null if cancelled. */
+function askText({ title, message='', value='', placeholder='', okText='Save', type='text' }){
+  return new Promise(resolve => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:6000;background:rgba(20,20,22,.35);display:flex;align-items:center;justify-content:center;padding:24px';
+    wrap.innerHTML = `<div style="background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(20,20,22,.18)">
+      <div style="font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:${message?'6px':'14px'}">${title}</div>
+      ${message?`<div style="font-size:13px;color:var(--ink-2);line-height:1.5;margin-bottom:14px">${message}</div>`:''}
+      <input class="txt" id="_askInput" type="${type}" placeholder="${placeholder}" value="${String(value).replace(/"/g,'&quot;')}" style="width:100%">
+      <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:18px">
+        <button class="btn" id="_askCancel">Cancel</button>
+        <button class="btn pri" id="_askOk">${okText}</button>
+      </div></div>`;
+    document.body.appendChild(wrap);
+    const input = wrap.querySelector('#_askInput');
+    const done = val => { wrap.remove(); resolve(val); };
+    wrap.querySelector('#_askCancel').onclick = () => done(null);
+    wrap.querySelector('#_askOk').onclick = () => done(input.value);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); done(input.value); }
+      if (e.key === 'Escape') done(null);
+    });
+    wrap.addEventListener('mousedown', e => { if (e.target === wrap) done(null); });
+    setTimeout(() => { input.focus(); if (input.select) input.select(); }, 30);
+  });
+}
+
 function renderMeetings(){
   const all=db.organizer().filter(l=>l.meeting_at);
   $('mt-empty').hidden = all.length>0;
@@ -503,7 +531,7 @@ function renderMeetings(){
     card.querySelectorAll('.ob[data-out]').forEach(b=>b.addEventListener('click', async () => {
       const o=b.dataset.out;
       if(o==='won'){
-        const v=prompt('What did the deal come to? (dollars)', L.deal_value||'');
+        const v=await askText({title:'Mark as won',message:`What did the deal with ${L.name} come to? (dollars)`,value:L.deal_value||'',placeholder:'e.g. 1200',okText:'Save as won',type:'number'});
         if(v===null) return;
         await db.update(L.place_id,{ meeting_outcome:'won', deal_value:Number(v)||0 });
         await db.logEvent('won',`Won <b>${L.name}</b> at $${(Number(v)||0).toLocaleString()}`);
@@ -515,9 +543,9 @@ function renderMeetings(){
           call_status:'noanswer', callback_on:d.toISOString().slice(0,10),
           notes:(L.notes?L.notes+' · ':'')+'No-showed the meeting' });
       } else if(o==='reschedule'){
-        const nd=prompt('New date (YYYY-MM-DD)', (L.meeting_at||'').slice(0,10));
+        const nd=await askText({title:'Reschedule meeting',message:`Pick a new date for ${L.name}.`,value:(L.meeting_at||'').slice(0,10),okText:'Next',type:'date'});
         if(!nd) return;
-        const nt=prompt('New time (HH:MM)', (L.meeting_at||'').slice(11,16)||'10:00');
+        const nt=await askText({title:'Reschedule meeting',message:'And the new time.',value:(L.meeting_at||'').slice(11,16)||'10:00',okText:'Save',type:'time'});
         if(!nt) return;
         await db.update(L.place_id,{ meeting_at:nd+'T'+nt, confirmed:0 });
       }
