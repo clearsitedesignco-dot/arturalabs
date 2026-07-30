@@ -184,11 +184,6 @@
 
     <!-- form -->
     <div id="sc-main" hidden>
-      <div class="alert" style="margin:0 0 20px">
-        <span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>
-        <div style="flex:1"><h4>Sample data — these businesses are not real</h4>
-        <p>This build runs on the mock provider so the tool can be tested without spending searches. Names and addresses are invented, phone numbers use the reserved 555 range so nobody can be called by accident, and websites end in <b>.example</b>, a domain that can never resolve. Real listings appear once the SerpApi provider is connected.</p></div>
-      </div>
       <div class="card">
         <div class="fgrid">
           <div class="fld">
@@ -247,20 +242,6 @@
       </div>
 
       <div id="sc-out"></div>
-
-      <div class="devbar">
-        <span class="dl">Test harness</span>
-        <select id="devErr">
-          <option value="ok">Normal search</option>
-          <option value="zero">Zero results</option>
-          <option value="key">Invalid API key</option>
-          <option value="quota">Monthly allowance exhausted</option>
-          <option value="hourly">Hourly cap hit</option>
-          <option value="network">Network failure</option>
-        </select>
-        <button class="btn" id="devReset">Clear all leads</button>
-        <span class="dn">Mock provider — no real API calls, nothing is billed</span>
-      </div>
     </div>
   </section>
 
@@ -344,13 +325,13 @@
   <section class="view" id="v-sitecheck" hidden>
     <div class="alert" style="margin:0 0 22px">
       <span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>
-      <div style="flex:1"><h4>Sample sites only in this build</h4>
-      <p>Browsers won't let a web page read another website's code, so nothing here can analyse a real address. Rather than invent findings that might be wrong, this build ships four authored sample sites. Every word of the reports is real and transfers straight across — only the fetching waits for the desktop app.</p></div>
+      <div style="flex:1"><h4>Two ways to use this</h4>
+      <p>Paste any business's website address in the box below to run a live check on it. Or open one of the example reports underneath to see how a finished report reads and rehearse the talking points before a call.</p></div>
     </div>
-    <p class="lede">Pick a sample site to see what the report gives you. Each problem comes one at a time, with the code, what it means, and the exact words to use on the call.</p>
+    <p class="lede">Each problem comes one at a time, with the code, what it means, and the exact words to use on the call. Start with an example below, or check a real site above.</p>
     <div class="samples" id="sc-picker"></div>
     <div class="urlbar" style="margin-top:22px">
-      <input id="siteUrl" placeholder="Try a real address (desktop app only)" spellcheck="false">
+      <input id="siteUrl" placeholder="Paste a website address to check it" spellcheck="false">
       <button class="btn" id="runCheck">Check it</button>
     </div>
     <div id="sc-report" style="margin-top:30px"></div>
@@ -433,7 +414,7 @@
     <div class="empty">
       <span class="bigico" style="opacity:1;width:58px;height:58px"><svg viewBox="0 0 120 100" style="width:58px;height:58px"><use href="#i-mark"/></svg></span>
       <h3 style="font-size:24px">ArturaLabs</h3>
-      <p style="font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;margin-top:4px">Version 0.2.0 — Shell + Lead Scraper</p>
+      <p style="font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;margin-top:4px">Version 0.3.0</p>
       <p style="margin-top:18px">A local-first workspace for finding clients and closing them. All of your data stays on this computer.</p>
     </div>
   </section>

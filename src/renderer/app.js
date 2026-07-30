@@ -230,7 +230,7 @@ function renderQueue(){
       <div class="qpos">${queueIdx+1} of ${q.length} in queue${dueNote}</div>
       <div class="qname">${L.name}</div>
       <div class="qmeta">${L.address}, ${L.city} ${L.zip}${L.attempts?` · ${L.attempts} previous ${L.attempts===1?'attempt':'attempts'}`:''}</div>
-      <div class="qphone">${L.phone}<span class="cp status" style="color:var(--ink-3)">sample number</span></div>
+      <div class="qphone">${L.phone}</div>
     </div>
     <div class="qbody">
       <div class="angles">
@@ -744,9 +744,10 @@ That's why small changes get quoted expensively — nobody wants to touch it. Bu
   fix:`Shared pieces written once and reused, so a change happens in one place and appears everywhere.` }
 };
 
-/* Authored sample sites. Findings are fixed per site — nothing is invented
-   about a real address, because a wrong claim on a live call is worse than
-   no tool at all. Real fetching replaces this in the desktop app. */
+/* Authored example sites for learning and call practice. Findings are fixed
+   per site — nothing is invented about a real address, because a wrong claim
+   on a live call is worse than no tool at all. To analyse a real business, type
+   its address in the check box above, which runs a live check. */
 const SAMPLES = [
   { id:'ai',  host:'summit-roofing-kc.netlify.app', label:'Built fast with an AI tool',
     note:'The pattern you see most: works on the surface, unfinished underneath.',
@@ -860,8 +861,8 @@ $('runCheck').addEventListener('click', async () => {
     return;
   }
   $('sc-report').innerHTML=`<div class="alert"><span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>
-    <div style="flex:1"><h4>This build can't open real websites</h4>
-    <p>Browsers block a web page from reading another site's code, so there is no way to genuinely analyse <b>${v||'that address'}</b> here. It would be easy to make this print a convincing-looking report anyway — and that is exactly the wrong thing to do, because you would end up telling a real business something untrue about their site on a live call.<br><br>Pick one of the sample sites below to see how the report works. Real addresses start working in the desktop version, where the check runs outside the browser.</p></div></div>`;
+    <div style="flex:1"><h4>Enter a website address first</h4>
+    <p>Type or paste a business's website into the box above, then press Check it to run a live report. Or open one of the example sites below to see how a finished report reads.</p></div></div>`;
 });
 $('siteUrl').addEventListener('keydown',e=>{ if(e.key==='Enter') $('runCheck').click(); });
 renderSamplePicker();
@@ -873,12 +874,12 @@ renderSamplePicker();
    member, so this is the missing side. Filled once, stored locally.
    ========================================================================= */
 const PROFILE_FIELDS=[
-  {k:'name',    l:'Your name',           ph:'Sebastian Cole',        req:true},
-  {k:'business',l:'Your business name',  ph:'Artura Web Studio',     req:true,
+  {k:'name',    l:'Your name',           ph:'Jordan Rivera',         req:true},
+  {k:'business',l:'Your business name',  ph:'Riverside Web Studio',  req:true,
    h:'If you don\'t have one yet, your own name is fine — plenty of people hire a person rather than a company.'},
-  {k:'city',    l:'Where you\'re based', ph:'Kansas City',           req:true,
+  {k:'city',    l:'Where you\'re based', ph:'Austin',                req:true,
    h:'Being local is the single strongest thing you have over a web agency.'},
-  {k:'phone',   l:'Your phone number',   ph:'(816) 555-0142',        req:true},
+  {k:'phone',   l:'Your phone number',   ph:'(555) 123-4567',        req:true},
   {k:'email',   l:'Your email address',  ph:'you@yourbusiness.com',  req:true},
   {k:'site',    l:'Your portfolio or site', ph:'yourbusiness.com',   req:false,
    h:'Optional. Left blank, the emails simply won\'t mention it.'},
@@ -1785,7 +1786,7 @@ function renderProject(){
    Renderer
    ========================================================================= */
 const views={home:'v-home',scraper:'v-scraper',organizer:'v-organizer',meetings:'v-meetings',sitecheck:'v-sitecheck',outreach:'v-outreach',prompts:'v-prompts',projects:'v-projects',profile:'v-profile',tool:'v-tool',keys:'v-keys',about:'v-about'};
-const heads={home:['Home','No leads yet'],scraper:['Lead Scraper','Find local businesses'],organizer:['Call Organizer','Book meetings'],meetings:['Meetings','Prepare and close'],sitecheck:['Site Check','Find what to talk about'],outreach:['Outreach','Find emails, then write them'],prompts:['Prompt Library','Motion that makes a site feel expensive'],projects:['Projects','Won work, start to handover'],profile:['Your Details','Used in every email you send'],keys:['API Keys','1 required key missing'],about:['About','']};
+const heads={home:['Home','No leads yet'],scraper:['Lead Scraper','Find local businesses'],organizer:['Call Organizer','Book meetings'],meetings:['Meetings','Prepare and close'],sitecheck:['Site Check','Find what to talk about'],outreach:['Outreach','Find emails, then write them'],prompts:['Prompt Library','Motion that makes a site feel expensive'],projects:['Projects','Won work, start to handover'],profile:['Your Details','Used in every email you send'],keys:['API Keys','Search and writing keys'],about:['About','']};
 let hasKey=false;
 
 function setIcon(el,id){el.innerHTML='<use href="#'+id+'"/>';el.setAttribute('viewBox',id==='i-mark'?'0 0 120 100':'0 0 24 24')}
@@ -1836,30 +1837,46 @@ document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=
 
 /* --- key vault --- */
 const b1=$('b1'), k1=$('k1'), p1=$('p1'), s1=$('s1'), m1=$('m1');
+const KEY_MASK = '••••••••••••••••••••••••';
+
+/* Show that a key is saved without ever exposing it: fill the field with a
+   masked stand-in and lock it, so it never looks empty. "Replace" clears it so
+   a new key can be pasted. The real key stays encrypted in the main process and
+   is never sent back to this window. */
+function reflectKeySaved(detailHtml){
+  k1.value = KEY_MASK; k1.readOnly = true;
+  p1.className = 'pip live'; s1.textContent = 'Connected';
+  b1.textContent = 'Replace'; b1.classList.remove('pri'); b1.disabled = false;
+  m1.innerHTML = detailHtml || '<span>A key is saved on this computer. Click <b>Replace</b> to paste a new one.</span>';
+}
+function startKeyReplace(){
+  k1.readOnly = false; k1.value = ''; k1.placeholder = 'Paste your new key here'; k1.focus();
+  p1.className = 'pip off'; s1.textContent = 'Not checked';
+  b1.textContent = 'Check key'; b1.classList.add('pri');
+  m1.innerHTML = '<span>Paste your new SerpApi key, then click <b>Check key</b>.</span>';
+}
+
 b1.addEventListener('click', async () => {
+  if (b1.textContent === 'Replace') { startKeyReplace(); return; }
   const v = k1.value.trim(); if (!v) { k1.focus(); return; }
   s1.textContent = 'Checking'; p1.className = 'pip off';
   b1.disabled = true; b1.innerHTML = '<span class="spin"></span> Checking…';
   try {
     const res = await unwrap(API.keys.test('searchApiKey', v));
     hasKey = true;
-    p1.className = 'pip live'; s1.textContent = 'Connected';
-    b1.textContent = 'Replace'; b1.classList.remove('pri');
     searchesLeft = res.left;
-    m1.innerHTML = `<span>This key works${res.plan ? ' on the ' + res.plan + ' plan' : ''}. ` +
-      `${res.left != null ? '<b>' + res.left + '</b> searches left this cycle. ' : ''}The Lead Scraper is unlocked.</span>`;
+    reflectKeySaved(`<span>This key works${res.plan ? ' on the ' + res.plan + ' plan' : ''}. ` +
+      `${res.left != null ? '<b>' + res.left + '</b> searches left this cycle. ' : ''}The Lead Scraper is unlocked.</span>`);
     $('railpip').className = 'pip live'; $('headpip').className = 'pip live';
     const hp = $('homepip'); if (hp) hp.className = 'pip live';
     $('heads').textContent = 'Ready';
     if (searchesLeft != null) $('meterN').textContent = searchesLeft;
   } catch (err) {
     p1.className = 'pip bad'; s1.textContent = 'Rejected';
+    b1.disabled = false; b1.textContent = 'Check key'; b1.classList.add('pri');
     m1.innerHTML = err.code === 'NETWORK'
       ? '<span>Could not reach SerpApi to check the key. Check your internet connection and try again.</span>'
       : '<span>SerpApi rejected this key. Check that you copied all of it, then paste it again.</span>';
-  } finally {
-    b1.disabled = false;
-    if (!hasKey) b1.textContent = 'Check key';
   }
 });
 
@@ -1959,7 +1976,7 @@ $('goSearch').addEventListener('click', async ()=>{
     return;
   }
 
-  const fields=selectedFields(), sim=$('devErr').value, out=$('sc-out'), btn=$('goSearch');
+  const fields=selectedFields(), out=$('sc-out'), btn=$('goSearch');
   btn.disabled=true; btn.innerHTML='<span class="spin"></span> Searching…';
   out.innerHTML=`<div class="summary" style="color:var(--ink-3)">Searching ${bt} in ${z}…</div>`;
 
@@ -1970,7 +1987,7 @@ $('goSearch').addEventListener('click', async ()=>{
   };
 
   try{
-    const r = await runSearch({businessType:bt, zip:z, fields, want, simulate:sim, onScan});
+    const r = await runSearch({businessType:bt, zip:z, fields, want, onScan});
     if(r.inserted===0 && r.filteredOut>0){
       out.innerHTML = `<div class="empty" style="margin-top:26px">
         <span class="bigico"><svg viewBox="0 0 24 24"><use href="#i-scraper"/></svg></span>
@@ -2007,8 +2024,6 @@ $('goSearch').addEventListener('click', async ()=>{
     btn.disabled=false; btn.textContent='Search';
   }
 });
-
-$('devReset').addEventListener('click',()=>{ db.reset(); searchesLeft=100; $('meterN').textContent=100; $('sc-out').innerHTML=''; refreshCounts(); });
 
 function updateCostNote(){
   const want=[...document.querySelectorAll('.w:checked')].map(c=>c.dataset.w);
@@ -2088,7 +2103,7 @@ function wireOnboarding(){
       $('onbNext2').disabled = false;
       $('railpip').className = 'pip live'; $('headpip').className = 'pip live';
       $('heads').textContent = 'Ready';
-      $('p1').className = 'pip live'; $('s1').textContent = 'Connected';
+      reflectKeySaved();
       if (searchesLeft != null) $('meterN').textContent = searchesLeft;
     } catch (err) {
       msg.className = 'onb-msg bad';
@@ -2119,9 +2134,7 @@ API.onProgress(d => { if (window._progress) window._progress(d.done, d.total, d.
       $('railpip').className='pip live'; $('headpip').className='pip live';
       const hp=$('homepip'); if(hp) hp.className='pip live';
       $('heads').textContent='Ready';
-      $('p1').className='pip live'; $('s1').textContent='Connected';
-      $('b1').textContent='Replace'; $('b1').classList.remove('pri');
-      $('m1').innerHTML='<span>A key is saved on this computer. Paste a new one to replace it.</span>';
+      reflectKeySaved();
     }
     if (meter && meter.ok && meter.data && meter.data.left != null) {
       searchesLeft = meter.data.left; $('meterN').textContent = searchesLeft;

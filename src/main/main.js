@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
 const db = require('./store');   // JSON store — no native code, nothing to compile
 const keys = require('./keys');
@@ -32,6 +32,26 @@ function createWindow() {
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (e, url) => {
     if (!url.startsWith('file://')) { e.preventDefault(); shell.openExternal(url); }
+  });
+
+  // Right-click menu. Electron ships none by default, which is why right-click
+  // did nothing. In a text field this gives Cut/Copy/Paste (so a key can be
+  // pasted with the mouse) and Select All; over selected text, Copy.
+  win.webContents.on('context-menu', (_e, params) => {
+    const { editFlags, isEditable, selectionText } = params;
+    const items = [];
+    if (isEditable) {
+      items.push({ role: 'cut', enabled: editFlags.canCut });
+      items.push({ role: 'copy', enabled: editFlags.canCopy });
+      items.push({ role: 'paste', enabled: editFlags.canPaste });
+      items.push({ type: 'separator' });
+      items.push({ role: 'selectAll' });
+    } else if (selectionText && selectionText.trim()) {
+      items.push({ role: 'copy' });
+      items.push({ type: 'separator' });
+      items.push({ role: 'selectAll' });
+    }
+    if (items.length) Menu.buildFromTemplate(items).popup({ window: win });
   });
 }
 
