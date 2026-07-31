@@ -194,7 +194,59 @@ handle('enrich:run', async placeIds => {
 });
 
 /* ---------------- site check ---------------- */
-handle('sitecheck:one', url => sitecheck.check(url));
+
+/* Load a URL in a hidden, sandboxed browser window and return the fully
+   rendered HTML. This is what makes Site Check accurate and reliable: a real
+   browser with real TLS that follows redirects and runs the site's JavaScript,
+   so it isn't blocked like a bot fetch and doesn't misread JS-rendered pages.
+   The page is untrusted, so: no node, context-isolated, sandboxed, and an
+   ephemeral session that shares nothing with the app. */
+async function renderPage(rawUrl) {
+  const url = sitecheck.normaliseUrl(rawUrl);   // throws on genuinely invalid input
+  const t0 = Date.now();
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      partition: 'sitecheck-' + Date.now(),
+      nodeIntegration: false, contextIsolation: true, sandbox: true,
+      webSecurity: true, backgroundThrottling: false, images: false
+    }
+  });
+  win.webContents.setUserAgent(sitecheck.BROWSER_UA);
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  win.webContents.on('will-navigate', (e, u) => { if (!/^https?:/i.test(u)) e.preventDefault(); });
+  try { win.webContents.session.setPermissionRequestHandler((_wc, _p, cb) => cb(false)); } catch {}
+  try {
+    await Promise.race([
+      win.loadURL(url.href).catch(() => {}),   // events/DOM tell us if it worked
+      new Promise(r => setTimeout(r, 20000))
+    ]);
+    await new Promise(r => setTimeout(r, 1200));   // let client-side rendering settle
+    let html = '';
+    try {
+      html = await win.webContents.executeJavaScript(
+        'document.documentElement ? document.documentElement.outerHTML : ""');
+    } catch {}
+    const finalUrl = win.webContents.getURL() || url.href;
+    return { reachable: !!(html && html.length > 200), html, finalUrl, ms: Date.now() - t0 };
+  } finally { try { win.destroy(); } catch {} }
+}
+
+handle('sitecheck:one', async rawUrl => {
+  // Best path: render in a real hidden browser (runs JS, isn't blocked as a bot).
+  let r = null;
+  try { r = await renderPage(rawUrl); } catch {}
+  if (r && r.reachable) {
+    if (sitecheck.isChallenge(r.finalUrl, r.html))
+      return { ok: true, reachable: true, blocked: true, url: r.finalUrl, score: null, bucket: null, findings: ['blocked'], ms: r.ms };
+    return await sitecheck.analyze(r.html, r.finalUrl, r.ms);
+  }
+  // Fallback: a plain browser-UA fetch. Less complete on JS-heavy sites, but it
+  // works when the headless render can't run, so the member still gets a report.
+  const f = await sitecheck.check(rawUrl).catch(() => null);
+  if (f) return f;
+  return { ok: true, reachable: false, bucket: 'dead', score: 0, findings: ['dead'], ms: (r && r.ms) || 0 };
+});
 handle('sitecheck:batch', async placeIds => {
   const leads = (placeIds ? placeIds.map(db.byPlaceId) : db.all()).filter(l => l && l.website);
   for (let i = 0; i < leads.length; i++) {

@@ -879,8 +879,18 @@ $('runCheck').addEventListener('click', async () => {
     $('sc-report').innerHTML=`<div class="scanline"><span class="spin"></span> Opening ${v} and reading how it is built…</div>`;
     try{
       const r=await unwrap(API.sitecheck.one(v));
+      if(r && r.blocked){
+        $('sc-report').innerHTML=`<div class="alert"><span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>
+          <div style="flex:1"><h4>${v} is behind bot protection</h4><p>The site is guarded by a challenge page (SiteGround, Cloudflare, or similar) that blocks automated visitors. It loads fine for a real person — so rather than analyse the challenge page and report things that aren't true, the check stops here. Open the site in your own browser to review it, or use it as a talking point: a host that challenges every visitor can hurt their SEO and speed.</p></div></div>`;
+        return;
+      }
+      if(r && r.reachable===false){
+        $('sc-report').innerHTML=`<div class="alert"><span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>
+          <div style="flex:1"><h4>Couldn't load ${v}</h4><p>The site didn't return a readable page — it may be down, extremely slow, or blocking automated visits. That's worth knowing on its own. Double-check the address, or open it in your own browser to confirm.</p></div></div>`;
+        return;
+      }
       scSample={ id:'live', host:(r.url||v).replace(/^https?:\/\//,'').replace(/\/$/,''),
-                 label:'Live check', note:'', found:r.findings.filter(f=>FINDINGS[f]) };
+                 label:'Live check', note:'', found:(r.findings||[]).filter(f=>FINDINGS[f]) };
       scIdx=0; renderSamplePicker(); renderSiteCheck();
     }catch(err){
       $('sc-report').innerHTML=`<div class="alert"><span class="ai"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></span>

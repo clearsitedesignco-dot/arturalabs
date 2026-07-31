@@ -5,7 +5,11 @@ const dns = require('dns').promises;
 /* Passive checks only. Everything here is information a normal browser
    receives when it loads the page. No probing for hidden files, no testing
    inputs, no unauthorised access of any kind — that would be a different
-   thing legally, regardless of intent. */
+   thing legally, regardless of intent.
+
+   The single live check renders the page in a real (hidden) browser and hands
+   the rendered HTML to analyse() below. The batch path uses a plain fetch,
+   which is faster for many leads but sees less on JavaScript-heavy sites. */
 
 const KEY_PATTERNS = [
   { re: /sk-[A-Za-z0-9_-]{20,}/,                    what: 'OpenAI secret key' },
@@ -21,11 +25,19 @@ const KEY_PATTERNS = [
 const BUILDER_HOSTS = ['wixsite.com','weebly.com','squarespace.com','godaddysites.com',
   'business.site','netlify.app','vercel.app','github.io','webflow.io','wordpress.com'];
 
+// A real, current browser UA. Many sites reject or challenge obvious bots.
+const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+                   '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
 async function get(url, opts = {}) {
   const res = await fetch(url, {
     redirect: 'follow',
     signal: AbortSignal.timeout(opts.timeout || 15000),
-    headers: { 'User-Agent': 'ArturaLabs-SiteCheck/1.0 (+site audit)' }
+    headers: {
+      'User-Agent': BROWSER_UA,
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9'
+    }
   });
   return res;
 }
@@ -36,36 +48,16 @@ function normaliseUrl(input) {
   return new URL(u);
 }
 
-async function check(input) {
-  const url = normaliseUrl(input);
-  const findings = [];
-  const t0 = Date.now();
-
-  let res, html;
-  try {
-    res = await get(url.href);
-    html = await res.text();
-  } catch {
-    // try http before declaring it dead
-    try {
-      const alt = new URL(url.href); alt.protocol = 'http:';
-      res = await get(alt.href); html = await res.text();
-      findings.push('nohttps');
-    } catch {
-      return { ok: true, reachable: false, bucket: 'dead', score: 0, findings: ['dead'], ms: Date.now() - t0 };
-    }
-  }
-  const ms = Date.now() - t0;
-  if (!res.ok && res.status >= 400) {
-    return { ok: true, reachable: false, bucket: 'dead', score: 0, findings: ['dead'], ms };
-  }
-
+/* Runs every finding against already-fetched HTML. Ideally that HTML is the
+   fully rendered DOM from a real browser (accurate); a plain-fetch body still
+   works but sees less on JS-rendered sites. */
+async function analyze(html, finalUrlStr, ms = 0) {
+  html = html || '';
+  const finalUrl = new URL(finalUrlStr);
   const $ = cheerio.load(html);
-  const finalUrl = new URL(res.url || url.href);
+  const findings = [];
 
-  if (finalUrl.protocol !== 'https:' && !findings.includes('nohttps')) findings.push('nohttps');
-
-  // mixed content: http:// asset references on an https page
+  if (finalUrl.protocol !== 'https:') findings.push('nohttps');
   if (finalUrl.protocol === 'https:') {
     const mixed = $('script[src^="http://"], img[src^="http://"], link[href^="http://"]').length;
     if (mixed > 0 && !findings.includes('nohttps')) findings.push('nohttps');
@@ -79,7 +71,6 @@ async function check(input) {
   const hasTel = $('a[href^="tel:"]').length > 0;
   if (!hasForm && !hasMailto && !hasTel) findings.push('nocontact');
 
-  // a form with no action and no submit handler goes nowhere
   if (hasForm) {
     const dead = $('form').toArray().every(f => {
       const action = ($(f).attr('action') || '').trim();
@@ -89,7 +80,7 @@ async function check(input) {
     if (dead && !hasHandler) findings.push('deadform');
   }
 
-  if (ms > 3000 || html.length > 3_000_000) findings.push('slow');
+  if (ms > 4000 || html.length > 3_000_000) findings.push('slow');
   if (!$('title').text().trim() || !$('meta[name="description"]').attr('content')) findings.push('noseo');
 
   const yearMatch = html.match(/(?:©|&copy;|copyright)\s*(20\d{2})/i);
@@ -98,10 +89,9 @@ async function check(input) {
   const hasAnalytics = /googletagmanager|google-analytics|plausible|umami|fathom|posthog/i.test(html);
   if (!hasAnalytics) findings.push('noanalytics');
 
-  // published source maps
   if (/sourceMappingURL=.+\.map/.test(html)) findings.push('sourcemaps');
 
-  // exposed keys — page HTML plus same-origin scripts
+  // exposed keys — rendered HTML plus same-origin scripts
   const scripts = $('script[src]').toArray()
     .map(el => $(el).attr('src'))
     .filter(Boolean)
@@ -116,19 +106,15 @@ async function check(input) {
   const exposed = KEY_PATTERNS.filter(k => k.re.test(blob)).map(k => k.what);
   if (exposed.length) findings.push('apikey');
 
-  // firestore/realtime db left open
   if (/firebaseio\.com|firestore\.googleapis/.test(blob) &&
       /allow\s+read,\s*write:\s*if\s+true/.test(blob)) findings.push('opendb');
 
-  // visitor input written straight into the page
   const sinkRe = /\.innerHTML\s*=\s*(?!['"`]\s*['"`])[A-Za-z_$][\w$.]*(user|comment|review|input|msg|message|name|search|query)[\w$.]*\s*[;,)]/i;
   const formSink = /\.innerHTML\s*=\s*[^;]{0,80}\.value\b/.test(blob);
   if (sinkRe.test(blob) || formSink) findings.push('nosanitize');
 
-  // email spoofing protection
-  // Only report a missing record when the lookup actually succeeded. A DNS
-  // failure means we do not know, and "we do not know" must never be
-  // reported to a member as "they are unprotected".
+  // email spoofing protection — only report a missing record when the lookup
+  // actually succeeded. "We do not know" must never be reported as "unprotected".
   let dnsChecked = false, spf = false, dmarc = false;
   try {
     const txt = await dns.resolveTxt(finalUrl.hostname);
@@ -156,4 +142,42 @@ async function check(input) {
   };
 }
 
-module.exports = { check, normaliseUrl, KEY_PATTERNS };
+/* A bot-protection challenge page (SiteGround sgcaptcha, Cloudflare, etc.) is
+   NOT the real site. Detecting it lets us say so honestly instead of analysing
+   the challenge page and inventing findings about it. */
+function isChallenge(finalUrlStr, html) {
+  const u = String(finalUrlStr || '').toLowerCase();
+  const h = String(html || '').slice(0, 6000).toLowerCase();
+  return /sgcaptcha|cdn-cgi\/challenge|__cf_chl|cf-browser-verification/.test(u)
+      || /sgcaptcha|__cf_chl|cf-chl-|just a moment\.\.\.|checking your browser before|attention required!|enable javascript and cookies to continue/.test(h);
+}
+
+/* Plain-fetch path (batch enrichment). Tries http before declaring dead. */
+async function check(input) {
+  const url = normaliseUrl(input);
+  const t0 = Date.now();
+
+  let res, html;
+  try {
+    res = await get(url.href);
+    html = await res.text();
+  } catch {
+    try {
+      const alt = new URL(url.href); alt.protocol = 'http:';
+      res = await get(alt.href); html = await res.text();
+    } catch {
+      return { ok: true, reachable: false, bucket: 'dead', score: 0, findings: ['dead'], ms: Date.now() - t0 };
+    }
+  }
+  if (!res.ok && res.status >= 400) {
+    return { ok: true, reachable: false, bucket: 'dead', score: 0, findings: ['dead'], ms: Date.now() - t0 };
+  }
+  const finalUrl = new URL(res.url || url.href);
+  if (isChallenge(finalUrl.href, html)) {
+    return { ok: true, reachable: true, blocked: true, url: finalUrl.href,
+             score: null, bucket: null, findings: ['blocked'], ms: Date.now() - t0 };
+  }
+  return analyze(html, finalUrl.href, Date.now() - t0);
+}
+
+module.exports = { check, analyze, normaliseUrl, isChallenge, KEY_PATTERNS, BROWSER_UA };
