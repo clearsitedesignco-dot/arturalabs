@@ -16,19 +16,19 @@ const MANIFEST = {
   "assets/icon.png": "72a6b5f07d4bbcc474f6dbb216973479e377efbf770b4a501fd2fa1e08fb98e5",
   "assets/mark-white.svg": "a20a6af9f7ea2c918157240d7a8f49b8d58a6263e879ab203758f5193179486c",
   "assets/mark.svg": "0e210c40bb74f79b257631449ee135bfd8f3f36d301057a23dd934906db85446",
-  "package.json": "a47853b24c1a7dcd4db9683ae690f542efc01ee6cecfd8e521e939d6688ec8f9",
+  "package.json": "1d887fa96b9321a6d828424611839e0ee1cd56769ed6cd99d02085601ed0a086",
   "scripts/fetch-fonts.js": "5e07778db9633ea00444cca6cb836ad153ad22868a5479b6d20c879b2e181537",
   "scripts/make-icons.js": "96a278e85fb8679e0d084689ba7e0ed2e67cd5ee8fb79d1304a74e442b230d1d",
   "src/main/enrich.js": "2e4e9a60f51147158a371dd18a001467a15713bef8a7c6fe7318962470bce92e",
   "src/main/keys.js": "8db4fb90938148acecf23701ac073add088554d81c73333cdbf20e13c000f76b",
-  "src/main/main.js": "debc5488d8e76dc6d90e23e077ec9d5e2d70e6911cb10c9f390b8a8484edda3e",
+  "src/main/main.js": "87486696c9268d36573686525afad16108cc55683ebc5e81a0d1e7f41ca0ff57",
   "src/main/preload.js": "1d91898e5d15bbf9ae8df3d27e57aab19340bb6dd38f819acc13667a2b231635",
   "src/main/providers/index.js": "992c69d22cf6fbc28a713882036bf28cb76417df9f6b011f70bf18c0ebed1b04",
   "src/main/providers/mock.js": "21e0b2b34218a81a7a29e6b452125b13dd8b5d2c36ad9a5ae198d3ba8d6b5234",
   "src/main/providers/serpapi.js": "aaeeb50777fce77bfbd3f4cf3be0ca7f8c5dc3dbac22bcebd4b0c416cd984fbc",
   "src/main/sitecheck.js": "f5d0dcc20f03e241c8c15b58a028cc360cc9681883c0b5353f1490bafb6cd153",
   "src/main/store.js": "c6e7d60bd2aae5804d6aec7cdda3ba32690b017223f37e789c311cb40698fae1",
-  "src/renderer/app.js": "bfca7be0e7d9d13ddf9354d47922154023946a0bb27829f1a9768ad33ddb1fa6",
+  "src/renderer/app.js": "21efebfddf06fde4b72e12e6c6a34434a0b6193f625868852265988999603b67",
   "src/renderer/fonts/archivo-500.woff2": "37104fa5c30e92a0dabb944452f63089007b44db26fdff6a255ca49b09c4e14e",
   "src/renderer/fonts/archivo-600.woff2": "37104fa5c30e92a0dabb944452f63089007b44db26fdff6a255ca49b09c4e14e",
   "src/renderer/fonts/archivo-700.woff2": "37104fa5c30e92a0dabb944452f63089007b44db26fdff6a255ca49b09c4e14e",
@@ -38,8 +38,9 @@ const MANIFEST = {
   "src/renderer/fonts/inter-400.woff2": "009049fc92898a74f4d613ab5311d4819e0929af9ca24307ab1dda081016f6ab",
   "src/renderer/fonts/inter-500.woff2": "009049fc92898a74f4d613ab5311d4819e0929af9ca24307ab1dda081016f6ab",
   "src/renderer/fonts/inter-600.woff2": "009049fc92898a74f4d613ab5311d4819e0929af9ca24307ab1dda081016f6ab",
-  "src/renderer/index.html": "f2e8f0fdbdc204106a8174633ff0b84ec3cde752a47bd55902099728d06db084",
-  "src/renderer/styles.css": "ed4a258789c205f710d9d20a6d7cdd0cfd6da029dc3bafa65addf481f8ce78b9"
+  "src/renderer/index.html": "598f82faf3b9a4d9487e9de10c4326131480c62c366db195b5a1b0c71282abf5",
+  "src/renderer/styles.css": "ed4a258789c205f710d9d20a6d7cdd0cfd6da029dc3bafa65addf481f8ce78b9",
+  "src/renderer/vendor/gsap.min.js": "28033e449a31ebcc396e5be8b13b63152bf03094288fb5867034321927bce087"
 };
 const strip = buf => { const o = Buffer.alloc(buf.length); let j = 0;
   for (let i = 0; i < buf.length; i++) if (buf[i] !== 0x0d) o[j++] = buf[i];

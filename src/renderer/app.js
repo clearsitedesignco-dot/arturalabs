@@ -1086,17 +1086,21 @@ function renderOutreach(){
       return;
     }
     box.innerHTML=`
-      <div class="tmpl">
-        <div class="sn2" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px">Template — businesses that have a site</div>
-        <textarea id="tA">${tmplIssues}</textarea>
-        <div class="tokens">${['{{business}}','{{firstName}}','{{issueCount}}','{{criticalLine}}','{{myName}}','{{myBusiness}}','{{myCity}}','{{myPhone}}','{{price}}','{{turn}}','{{proofLine}}'].map(t=>`<span class="tok">${t}</span>`).join('')}</div>
-        <div class="h2" style="margin-top:12px;font-size:11.5px;color:var(--ink-3);line-height:1.55">Notice what the template doesn't do: it never names the problems. Saying you found something specific and offering to show them is what gets the meeting — and spelling out a stranger's security holes in writing reads badly, however well you mean it.</div>
-      </div>
-      <div class="tmpl">
-        <div class="sn2" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px">Template — businesses with no site at all</div>
-        <textarea id="tB">${tmplNosite}</textarea>
-      </div>
-      <div class="h-sec">${targets.length} emails ready</div>
+      <details class="tmplWrap" style="border:1px solid var(--line);border-radius:12px;background:var(--bg-panel);margin-bottom:20px;padding:0 20px">
+        <summary style="cursor:pointer;padding:15px 0;font-size:13.5px;font-weight:500">Edit the two email templates (optional)</summary>
+        <div class="tmpl" style="border:0;padding:0 0 18px;margin:0;background:none">
+          <div class="sn2" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px">Template — businesses that have a site</div>
+          <textarea id="tA">${tmplIssues}</textarea>
+          <div class="tokens">${['{{business}}','{{firstName}}','{{issueCount}}','{{criticalLine}}','{{myName}}','{{myBusiness}}','{{myCity}}','{{myPhone}}','{{price}}','{{turn}}','{{proofLine}}'].map(t=>`<span class="tok">${t}</span>`).join('')}</div>
+          <div class="h2" style="margin-top:12px;font-size:11.5px;color:var(--ink-3);line-height:1.55">Notice what the template doesn't do: it never names the problems. Saying you found something specific and offering to show them is what gets the meeting — and spelling out a stranger's security holes in writing reads badly, however well you mean it.</div>
+        </div>
+        <div class="tmpl" style="border:0;padding:0 0 18px;margin:0;background:none">
+          <div class="sn2" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px">Template — businesses with no site at all</div>
+          <textarea id="tB">${tmplNosite}</textarea>
+        </div>
+      </details>
+      <div class="h-sec">${targets.length} emails ready to send</div>
+      <p class="h2" style="font-size:12.5px;color:var(--ink-3);line-height:1.6;max-width:640px;margin:-2px 0 16px">Each business below has its own email, written from your details and what was found on its site. Click one to read or edit it, then <b>Send email</b> (opens your mail program) or <b>Gmail</b> — both open already addressed and filled in, so you just press send there.</p>
       <div id="mailList"></div>`;
 
     const redraw=()=>{
@@ -1107,16 +1111,33 @@ function renderOutreach(){
             <span class="fz">${L.emailed?'Sent':(L.website?`${(L.findings||[]).length} findings`:'no site')}</span></div>
           <div class="mb"><div class="subj">Subject: ${m.subject}</div>
             <textarea data-body="${i}">${m.body}</textarea>
-            <div class="mact"><button class="btn" data-copy="${i}">Copy email</button>
-              <button class="btn pri" data-sent="${i}">${L.emailed?'Sent':'Mark as sent'}</button></div></div>
+            <div class="mact">
+              <button class="btn pri" data-send="${i}">${L.emailed?'Send again':'Send email'}</button>
+              <button class="btn" data-gmail="${i}">Gmail</button>
+              <button class="btn" data-copy="${i}">Copy</button>
+              ${L.emailed?'<span class="meter" style="margin-left:auto">✓ sent</span>':`<button class="btn" data-sent="${i}" style="margin-left:auto">Mark sent</button>`}
+            </div></div>
         </div>`;
       }).join('');
       $('mailList').querySelectorAll('.mh').forEach(h=>h.addEventListener('click',()=>h.parentElement.querySelector('.mb').classList.toggle('open')));
       $('mailList').querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{
         const ta=$('mailList').querySelector(`[data-body="${b.dataset.copy}"]`);
         navigator.clipboard?.writeText(ta.value);
-        b.textContent='Copied'; setTimeout(()=>{ if(b.isConnected) b.textContent='Copy email'; },1500);
+        b.textContent='Copied'; setTimeout(()=>{ if(b.isConnected) b.textContent='Copy'; },1500);
       }));
+      const openCompose = async (i, makeUrl) => {
+        const T=targets[i], m=mergeEmail(T);
+        const body=$('mailList').querySelector(`[data-body="${i}"]`).value;
+        await API.openExternal(makeUrl(T, m, body));
+        await db.update(T.place_id,{ emailed_at:new Date().toISOString() });
+        await db.logEvent('mail',`Emailed <b>${T.name}</b>`);
+        targets=STATE.leads.filter(l=>l.email);
+        redraw(); renderSteps(); refreshCounts();
+      };
+      $('mailList').querySelectorAll('[data-send]').forEach(b=>b.addEventListener('click',()=>openCompose(+b.dataset.send,
+        (T,m,body)=>`mailto:${encodeURIComponent(T.email)}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(body)}`)));
+      $('mailList').querySelectorAll('[data-gmail]').forEach(b=>b.addEventListener('click',()=>openCompose(+b.dataset.gmail,
+        (T,m,body)=>`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(T.email)}&su=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(body)}`)));
       $('mailList').querySelectorAll('[data-sent]').forEach(b=>b.addEventListener('click', async () => {
         const T=targets[+b.dataset.sent];
         await db.update(T.place_id,{ emailed_at:new Date().toISOString() });
@@ -1825,13 +1846,31 @@ function refreshCounts(){
   setNum($('c-enriched'), db.all().filter(l=>l.email).length);
   setNum($('c-contacted'), db.all().filter(l=>l.emailed||l.attempts>0).length);
   setNum($('c-booked'), c.booked);
-  const closed = 11000 + db.all().reduce((n,l)=>n+(l.meeting_outcome==='won'?Number(l.deal_value)||0:0),0);
-  const cv=document.querySelector('.won .wv'); if(cv) setNum(cv, closed, '$');
-  const wb=document.querySelector('.won .wb');
-  if(wb) wb.innerHTML=`<b>$11,000</b> carried in<br><b>$${(closed-11000).toLocaleString()}</b> logged in the Call Organizer<br>1 member reporting`;
+  const won = db.all().reduce((n,l)=>n+(l.meeting_outcome==='won'?Number(l.deal_value)||0:0),0);
+  const wonCount = db.all().filter(l=>l.meeting_outcome==='won').length;
+  const inPlay = db.organizer().filter(l=>!['no','blacklist'].includes(l.call_status)).length;
+  const cv=$('wonVal'); if(cv) setNum(cv, won, '$');
+  const side=$('wonSide');
+  if(side) side.innerHTML=`<b>${wonCount}</b> ${wonCount===1?'deal':'deals'} won<br><b>${c.booked}</b> meetings booked<br><b>${inPlay}</b> leads in play`;
+  const cap=$('wonCap');
+  if(cap) cap.textContent = won>0
+    ? 'Your own total, tracked on this computer as you mark deals won in the Call Organizer.'
+    : 'Your first closed deal shows up here — mark a meeting won in the Call Organizer and watch it climb.';
   renderActivity();
   const n=db.countLeads();
   if(!$('v-home').hidden) $('vs').textContent = n? `${n} leads collected` : 'No leads yet';
+}
+
+/* Subtle GSAP flourish around the closed-won panel — a soft rise-in on arrival
+   plus a slow breathing shadow so it reads "alive" without breaking the calm. */
+function animateHome(){
+  const panel=$('wonPanel');
+  if(!panel || reduce || !window.gsap) return;
+  gsap.killTweensOf(panel);
+  gsap.fromTo(panel,{y:16,opacity:0,filter:'blur(3px)'},
+    {y:0,opacity:1,filter:'blur(0px)',duration:.6,ease:'power3.out'});
+  gsap.to(panel,{boxShadow:'0 12px 38px rgba(20,20,22,.22)',duration:2.8,
+    ease:'sine.inOut',yoyo:true,repeat:-1,delay:.6});
 }
 
 function go(btn){
@@ -1858,7 +1897,7 @@ function go(btn){
     if(t==='prompts'){ renderPrompts(); }
     if(t==='projects'){ renderProjects(); }
     if(t==='profile'){ renderProfile(); }
-    if(t==='home') refreshCounts();
+    if(t==='home'){ refreshCounts(); animateHome(); }
   }
 }
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b)));
@@ -1883,6 +1922,38 @@ function startKeyReplace(){
   b1.textContent = 'Check key'; b1.classList.add('pri');
   m1.innerHTML = '<span>Paste your new SerpApi key, then click <b>Check key</b>.</span>';
 }
+
+/* Anthropic (optional) key — same connect/replace behaviour as SerpApi. */
+const b2=$('b2'), k2=$('k2'), p2=$('p2'), s2=$('s2'), m2=$('m2');
+function reflectAnthropicSaved(detailHtml){
+  if(!k2) return;
+  k2.value = KEY_MASK; k2.readOnly = true;
+  p2.className = 'pip live'; s2.textContent = 'Connected';
+  b2.textContent = 'Replace'; b2.classList.remove('pri'); b2.disabled = false;
+  m2.innerHTML = detailHtml || '<span>A key is saved on this computer. Click <b>Replace</b> to paste a new one.</span>';
+}
+function startAnthropicReplace(){
+  k2.readOnly = false; k2.value = ''; k2.placeholder = 'Paste your new key here'; k2.focus();
+  p2.className = 'pip off'; s2.textContent = 'Not checked';
+  b2.textContent = 'Check key'; b2.classList.add('pri');
+  m2.innerHTML = '<span>Paste your Anthropic key (it starts with <b>sk-ant-</b>), then click Check key.</span>';
+}
+if (b2) b2.addEventListener('click', async () => {
+  if (b2.textContent === 'Replace') { startAnthropicReplace(); return; }
+  const v = k2.value.trim(); if (!v) { k2.focus(); return; }
+  s2.textContent = 'Checking'; p2.className = 'pip off';
+  b2.disabled = true; b2.innerHTML = '<span class="spin"></span> Checking…';
+  try {
+    await unwrap(API.keys.test('anthropic', v));
+    reflectAnthropicSaved('<span>This key works. The Outreach Generator can draft emails with Claude.</span>');
+  } catch (err) {
+    p2.className = 'pip bad'; s2.textContent = 'Rejected';
+    b2.disabled = false; b2.textContent = 'Check key'; b2.classList.add('pri');
+    m2.innerHTML = err.code === 'NETWORK'
+      ? '<span>Could not reach Anthropic to check the key. Check your internet connection and try again.</span>'
+      : '<span>Anthropic rejected this key. Make sure you copied the whole key — it starts with <b>sk-ant-</b>.</span>';
+  }
+});
 
 b1.addEventListener('click', async () => {
   if (b1.textContent === 'Replace') { startKeyReplace(); return; }
@@ -2164,6 +2235,7 @@ API.onProgress(d => { if (window._progress) window._progress(d.done, d.total, d.
       $('heads').textContent='Ready';
       reflectKeySaved();
     }
+    try { if (await unwrap(API.keys.has('anthropic'))) reflectAnthropicSaved(); } catch {}
     if (meter && meter.ok && meter.data && meter.data.left != null) {
       searchesLeft = meter.data.left; $('meterN').textContent = searchesLeft;
     }
@@ -2173,6 +2245,7 @@ API.onProgress(d => { if (window._progress) window._progress(d.done, d.total, d.
     await syncState();
     projects = STATE.projects;
     refreshCounts();
+    animateHome();
     updateCostNote();
   }catch(err){
     console.error('boot failed', err);

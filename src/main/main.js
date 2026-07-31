@@ -81,12 +81,36 @@ handle('keys:has',    name => keys.has(name));
 handle('keys:set',    ({ name, value }) => { keys.set(name, value); return true; });
 handle('keys:remove', name => { keys.remove(name); return true; });
 handle('keys:test',   async ({ name, value }) => {
+  if (name === 'anthropic') {
+    await validateAnthropic(value);     // throws BAD_KEY / NETWORK on failure
+    keys.set('anthropic', value);
+    return { valid: true };
+  }
   if (name !== KEY_SEARCH) return { valid: !!value };
   const acct = await providers.get('serpapi').account(value);
   if (!acct) { const e = new Error('rejected'); e.code = 'BAD_KEY'; throw e; }
   keys.set(KEY_SEARCH, value);
   return { valid: true, ...acct };
 });
+
+/* Validate an Anthropic (Claude) API key without spending tokens: the models
+   list endpoint just needs a valid key. 200 = good, 401/403 = rejected. */
+async function validateAnthropic(value) {
+  const key = String(value || '').trim();
+  if (!key) { const e = new Error('empty'); e.code = 'BAD_KEY'; throw e; }
+  let res;
+  try {
+    res = await fetch('https://api.anthropic.com/v1/models', {
+      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      signal: AbortSignal.timeout(15000)
+    });
+  } catch (err) {
+    const e = new Error('network'); e.code = 'NETWORK'; e.cause = err; throw e;
+  }
+  if (res.ok) return true;
+  if (res.status === 401 || res.status === 403) { const e = new Error('rejected'); e.code = 'BAD_KEY'; throw e; }
+  const e = new Error('unexpected ' + res.status); e.code = 'UNKNOWN'; throw e;
+}
 handle('meter:get', async () => {
   const k = keys.get(KEY_SEARCH);
   if (!k) return null;

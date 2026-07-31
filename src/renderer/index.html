@@ -134,7 +134,7 @@
 
   <!-- HOME -->
   <section class="view" id="v-home">
-    <p class="lede">Your leads, notes, and API keys are stored on this computer and never sent to ArturaLabs. The only thing shared is your closed-deal total, which powers the member counter below — and you can switch that off.</p>
+    <p class="lede">Your leads, notes, and API keys are stored on this computer and never sent to ArturaLabs. The counter below is your own — it climbs as you close deals.</p>
     <div class="pipewrap"><div class="flowline"><i></i><i></i><i></i></div>
     <div class="pipe rise">
       <div class="stage"><span class="si"><svg viewBox="0 0 24 24"><use href="#i-scraper"/></svg></span><div class="t">Scraped</div><div class="v" id="c-scraped">0</div><div class="u">leads</div></div>
@@ -142,15 +142,15 @@
       <div class="stage"><span class="si"><svg viewBox="0 0 24 24"><use href="#i-outreach"/></svg></span><div class="t">Contacted</div><div class="v" id="c-contacted">0</div><div class="u">sent</div></div>
       <div class="stage"><span class="si"><svg viewBox="0 0 24 24"><use href="#i-calls"/></svg></span><div class="t">Booked</div><div class="v" id="c-booked">0</div><div class="u">calls</div></div>
     </div></div>
-    <div class="won">
+    <div class="won" id="wonPanel">
       <span class="wi"><svg viewBox="0 0 24 24"><use href="#i-closed"/></svg></span>
       <div>
-        <div class="wt"><span class="livedot"></span> Closed by ArturaLabs members</div>
-        <div class="wv">$11,000</div>
+        <div class="wt"><span class="livedot"></span> Closed won by you</div>
+        <div class="wv" id="wonVal">$0</div>
       </div>
-      <div class="wb"><b>$11,000</b> carried in<br><b>$0</b> logged in the Call Organizer<br>1 member reporting</div>
+      <div class="wb" id="wonSide"><b>0</b> deals won<br><b>0</b> meetings booked<br><b>0</b> leads in play</div>
     </div>
-    <p class="caption">Counts deals members marked won in the Call Organizer, plus revenue carried in from before they joined. Individual results vary and most members earn nothing. Sharing your number is optional and can be switched off in Settings.</p>
+    <p class="caption" id="wonCap">Your first closed deal shows up here — mark a meeting won in the Call Organizer and watch it climb.</p>
 
     <div class="h-sec">Activity</div>
     <div class="actwrap" id="actFeed"></div>
@@ -396,12 +396,13 @@
           <div class="ktitle">Anthropic <span class="req">Optional</span></div>
           <div class="kdesc">Writes first-draft outreach in the Outreach Generator. Skip it and you can still write your templates by hand.</div>
         </div>
-        <div class="kr"><span class="status"><span class="pip off"></span><span>Not added</span></span></div>
+        <div class="kr"><span class="status"><span class="pip off" id="p2"></span><span id="s2">Not added</span></span></div>
       </div>
       <div class="kfield">
-        <input type="text" placeholder="Paste your key here" autocomplete="off" spellcheck="false">
-        <button class="btn">Check key</button>
+        <input id="k2" type="text" placeholder="Paste your key here" autocomplete="off" spellcheck="false">
+        <button class="btn" id="b2">Check key</button>
       </div>
+      <div class="kmsg" id="m2"></div>
     </div>
     <div class="note">
       <span class="ni"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></span>
@@ -414,7 +415,7 @@
     <div class="empty">
       <span class="bigico" style="opacity:1;width:58px;height:58px"><svg viewBox="0 0 120 100" style="width:58px;height:58px"><use href="#i-mark"/></svg></span>
       <h3 style="font-size:24px">ArturaLabs</h3>
-      <p style="font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;margin-top:4px">Version 0.4.0</p>
+      <p style="font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;margin-top:4px">Version 1.0.0</p>
       <p style="margin-top:18px">A local-first workspace for finding clients and closing them. All of your data stays on this computer.</p>
     </div>
   </section>
@@ -485,6 +486,7 @@
   </div>
 </div>
 
+<script src="vendor/gsap.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
